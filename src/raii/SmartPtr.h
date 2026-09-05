@@ -29,10 +29,11 @@ using CorePtr = std::unique_ptr<T, EngineDeleter<T>>;
 
 template <typename T, typename... Args>
 CorePtr<T> make_core(Args&&... args) {
-    static_assert(sizeof(T) <= 64, "Fatal: Object size exceeds FreeList chunk size");
+    static_assert(sizeof(T) <= 1024, "Fatal: Object size exceeds max pool size");
+
     void* raw_memory_ptr{};
     if (g_engine) {
-        raw_memory_ptr = g_engine->pop();
+        raw_memory_ptr = g_engine->pop(sizeof(T));
     } else {
         raw_memory_ptr = std::malloc(sizeof(T));
     }

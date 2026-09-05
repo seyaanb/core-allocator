@@ -7,10 +7,10 @@
 extern engine::FreeList* g_engine;
 extern core::MemoryBlock* g_block;
 
-constexpr std::size_t CHUNK_SIZE = 64;
+constexpr std::size_t MAX_POOL_SIZE = 1024;
 
 void* operator new(std::size_t size) {
-    if (g_engine == nullptr) {
+    if (g_engine == nullptr || size > MAX_POOL_SIZE) {
         void* ptr = std::malloc(size);
         if (ptr == nullptr) {
             fprintf(stderr, "Fatal Error: No memory remaining.\n");
@@ -18,15 +18,10 @@ void* operator new(std::size_t size) {
         }
         return ptr;
     }
-
-    if (size > CHUNK_SIZE) {
-        fprintf(stderr, "Fatal Error: size greater than CHUNK_SIZE.\n");
-        std::abort();
-    }
-
-    void* ptr = g_engine->pop();
+    
+    void* ptr = g_engine->pop(size);
     if (ptr == nullptr) {
-        fprintf(stderr, "Fatal Error: No memory remaining.\n");
+        fprintf(stderr, "Fatal Error: Pool exhausted.\n");
         std::abort();
     }
 
@@ -58,10 +53,10 @@ void operator delete[](void* ptr) noexcept {
     return ::operator delete(ptr);
 }
 
-void operator delete(void* ptr, std::size_t size) noexcept {
+void operator delete(void* ptr, std::size_t /*size*/) noexcept {
     return ::operator delete(ptr);
 }
 
-void operator delete[](void* ptr, std::size_t size) noexcept {
+void operator delete[](void* ptr, std::size_t /*size*/) noexcept {
     return ::operator delete(ptr);
 }
