@@ -42,5 +42,5 @@ void operator delete(void* ptr) noexcept {
 
 void* operator new[](std::size_t size) { return ::operator new(size); }
 void operator delete[](void* ptr) noexcept { ::operator delete(ptr); }
-void operator delete(void* ptr, std::size_t size) noexcept { ::operator delete(ptr); }
-void operator delete[](void* ptr, std::size_t size) noexcept { ::operator delete(ptr); }
+void operator delete(void* ptr, std::size_t) noexcept { ::operator delete(ptr); }
+void operator delete[](void* ptr, std::size_t) noexcept { ::operator delete(ptr); }
