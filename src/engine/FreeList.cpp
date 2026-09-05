@@ -1,4 +1,5 @@
 #include "FreeList.h"
+#include "../telemetry/MemoryTracker.h"
 #include <cstddef>
 #include <cassert>
 #include <cstdint>
@@ -24,7 +25,7 @@ FreeList::FreeList(void* base_ptr, size_t total_size, size_t chunk_size) : m_hea
     }
     curr->next = nullptr;
 }
-f
+
 void* FreeList::pop() noexcept {
     if (m_head == nullptr) {
         return nullptr;
@@ -32,6 +33,8 @@ void* FreeList::pop() noexcept {
 
     void* alloc = static_cast<void*>(m_head);
     m_head = m_head->next;
+    
+    telemetry::MemoryTracker::record_allocation();
     return alloc;
 }
 
@@ -42,6 +45,8 @@ void FreeList::push(void* ptr) noexcept {
     Node* node = static_cast<Node*>(ptr);
     node->next = m_head;
     m_head = node;
+
+    telemetry::MemoryTracker::record_deallocation();
 }
 
 }

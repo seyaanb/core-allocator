@@ -29,4 +29,12 @@ size_t MemoryBlock::get_size() const noexcept {
     return m_size;
 }
 
+std::uintptr_t MemoryBlock::get_start_address() const noexcept {
+    return reinterpret_cast<std::uintptr_t>(m_base_ptr);
+}
+
+std::uintptr_t MemoryBlock::get_end_address() const noexcept {
+    return reinterpret_cast<std::uintptr_t>(m_base_ptr) + m_size;
+}
+
 }

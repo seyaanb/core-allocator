@@ -22,6 +22,9 @@ class MemoryBlock {
 
         void* get_base_pointer() const noexcept;
         size_t get_size() const noexcept;
+
+        std::uintptr_t get_start_address() const noexcept;
+        std::uintptr_t get_end_address() const noexcept;
     
     private:
         void* m_base_ptr;
