@@ -4,7 +4,6 @@ project(CoreAllocator CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Note: Removed -fsanitize=thread. Sanitizers destroy benchmark latency accuracy.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -fno-exceptions -fno-rtti -Wall -Wextra -Werror")
 
 # Core Library Files
@@ -14,16 +13,17 @@ set(CORE_SOURCES
     src/bridges/GlobalOverride.cpp
 )
 
-add_library(core_allocator STATIC
-    src/core/MemoryBlock.cpp
-    src/engine/FreeList.cpp
-    src/bridges/GlobalOverride.cpp
-)
+# 1. The Core Deliverable: A Static Library
+add_library(core_allocator STATIC ${CORE_SOURCES})
 
+# 2. The Correctness Test
 add_executable(allocator_test tests/main.cpp)
 target_link_libraries(allocator_test PRIVATE core_allocator)
 
-# Fetch Google Benchmark
+# Disable benchmark's internal tests so it doesn't look for GTest
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark tests" FORCE)
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "Disable GTest" FORCE)
+
 include(FetchContent)
 FetchContent_Declare(
     benchmark
@@ -32,6 +32,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(benchmark)
 
-# Benchmark Target
-add_executable(allocator_bench benchmarks/AllocatorBench.cpp ${CORE_SOURCES})
-target_link_libraries(allocator_bench PRIVATE benchmark::benchmark benchmark::benchmark_main pthread)
+# 3. The Benchmark Target
+add_executable(allocator_bench benchmarks/AllocatorBench.cpp)
+target_link_libraries(allocator_bench PRIVATE core_allocator benchmark::benchmark benchmark::benchmark_main pthread)
