@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <bit>
 
 namespace engine {
 
@@ -24,10 +23,9 @@ class FreeList {
         };
 
         Node* m_heads[5];
-        void* m_base_ptr;
-        size_t m_slab_size;
         
-        size_t get_index(size_t size) const noexcept;
+        void* m_base_ptr;
+        size_t m_region_size;
 };
 
 }

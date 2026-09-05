@@ -1,16 +1,17 @@
 #include <new>
 #include <cstdlib>
 #include <cstdio>
+#include <cstdint>
 #include "../engine/FreeList.h"
 #include "../core/MemoryBlock.h"
 
 extern engine::FreeList* g_engine;
 extern core::MemoryBlock* g_block;
 
-constexpr std::size_t MAX_POOL_SIZE = 1024;
+constexpr std::size_t MAX_ALLOC_SIZE = 1024;
 
 void* operator new(std::size_t size) {
-    if (g_engine == nullptr || size > MAX_POOL_SIZE) {
+    if (g_engine == nullptr || size > MAX_ALLOC_SIZE) {
         void* ptr = std::malloc(size);
         if (ptr == nullptr) {
             fprintf(stderr, "Fatal Error: No memory remaining.\n");
@@ -18,10 +19,10 @@ void* operator new(std::size_t size) {
         }
         return ptr;
     }
-    
+
     void* ptr = g_engine->pop(size);
     if (ptr == nullptr) {
-        fprintf(stderr, "Fatal Error: Pool exhausted.\n");
+        fprintf(stderr, "Fatal Error: Engine memory depleted.\n");
         std::abort();
     }
 
@@ -50,13 +51,13 @@ void* operator new[](std::size_t size) {
 }
 
 void operator delete[](void* ptr) noexcept {
-    return ::operator delete(ptr);
+    ::operator delete(ptr);
 }
 
-void operator delete(void* ptr, std::size_t /*size*/) noexcept {
-    return ::operator delete(ptr);
+void operator delete(void* ptr, std::size_t /* size */) noexcept {
+    ::operator delete(ptr);
 }
 
-void operator delete[](void* ptr, std::size_t /*size*/) noexcept {
-    return ::operator delete(ptr);
+void operator delete[](void* ptr, std::size_t /* size */) noexcept {
+    ::operator delete(ptr);
 }
