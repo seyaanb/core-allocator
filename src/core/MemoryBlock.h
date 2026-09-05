@@ -2,33 +2,33 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <atomic>
 
 namespace core {
 
 class MemoryBlock {
     public:
-        explicit MemoryBlock(size_t total_bytes);
+        static MemoryBlock& get_instance() noexcept;
 
-        ~MemoryBlock();
-
-        //Copy constructor
+        // Deleted copy/move semantics
         MemoryBlock(const MemoryBlock&) = delete;
-        //Copy assignment
         MemoryBlock& operator=(const MemoryBlock&) = delete;
-        //Move constructor
         MemoryBlock(MemoryBlock&&) = delete;
-        //Move assignment
         MemoryBlock& operator=(MemoryBlock&&) = delete;
 
-        void* get_base_pointer() const noexcept;
-        size_t get_size() const noexcept;
+        void* allocate_slab(size_t slab_size) noexcept;
 
         std::uintptr_t get_start_address() const noexcept;
         std::uintptr_t get_end_address() const noexcept;
-    
+        
     private:
+        explicit MemoryBlock(size_t total_bytes);
+        ~MemoryBlock();
+
         void* m_base_ptr;
         size_t m_size;
+        
+        alignas(64) std::atomic<size_t> m_global_offset;
 };
 
 }
